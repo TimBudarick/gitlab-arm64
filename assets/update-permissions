@@ -33,6 +33,7 @@ if id -u git; then
 	# Fix data storage
 	chown_if_exists -R git:git /var/opt/gitlab/.ssh
 	chown_if_exists -R git:git /var/opt/gitlab/.gitconfig
+	chown_if_exists -R git:git /var/opt/gitlab/gitaly
 	chown_if_exists -R git:git /var/opt/gitlab/git-data
 	chmod_if_exists 2770 /var/opt/gitlab/git-data/repositories
 	chown_if_exists -R git:git /var/opt/gitlab/gitlab-ci/builds
@@ -91,7 +92,11 @@ fi
 
 # Fix registry storage
 if id -u registry; then
-    chown_if_exists -R registry:git /var/opt/gitlab/gitlab-rails/shared/registry
+	if [ -e "/var/opt/gitlab/gitlab-rails/shared/registry" ]; then
+		find /var/opt/gitlab/gitlab-rails/shared/registry -type d -exec chmod 755 {} \;
+		find /var/opt/gitlab/gitlab-rails/shared/registry -type f -exec chmod 744 {} \;
+	fi
+	chown_if_exists -R registry:git /var/opt/gitlab/gitlab-rails/shared/registry
 fi
 
 # Fix mattermost storage
